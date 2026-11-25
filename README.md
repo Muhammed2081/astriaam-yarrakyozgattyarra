@@ -1,0 +1,2 @@
+# astriaam-yarrakyozgattyarra
+kıskanmayın kk 
